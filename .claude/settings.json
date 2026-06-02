@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip index *)",
+      "Bash(python3)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read -r f; if echo \"$f\" | grep -qE '(^|/)(\\.|)env(\\.|$|/)|(\\.github|/\\.github)'; then echo '{\"continue\": false, \"stopReason\": \"🔒 Access denied: .env and .github files are protected (contain credentials). Credentials must remain in these files but never be read.\"}'; else echo '{\"continue\": true}'; fi; }",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

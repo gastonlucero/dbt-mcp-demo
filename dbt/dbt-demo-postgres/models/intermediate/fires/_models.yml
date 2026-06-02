@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: int_fires__risk_by_municipality
+    description: >
+      Intermediate transformation: fire risk metrics aggregated by municipality.
+      Reusable layer that combines frequency, intensity, and climatic metrics.
+      Grain: One row per (country, state, municipality) combination.
+
+      **Reused by:** fct_fires__risk_by_municipality
+    columns:
+      - name: country
+        description: "Country name."
+      - name: municipality
+        description: "Municipality name."
+      - name: state
+        description: "State or province."
+      - name: country_id
+        description: "Numeric country identifier."
+      - name: state_id
+        description: "Numeric state identifier."
+      - name: municipality_id
+        description: "Numeric municipality identifier."
+      - name: total_fire_incidents
+        description: "Total distinct fire events detected in this municipality."
+      - name: avg_incidents_per_day
+        description: "Average fire incidents per day (over observation period)."
+      - name: avg_fire_risk_score
+        description: "Average fire risk score (0–1)."
+      - name: max_fire_risk_score
+        description: "Maximum fire risk score recorded."
+      - name: avg_fire_radiative_power_mw
+        description: "Average Fire Radiative Power in megawatts."
+      - name: max_fire_radiative_power_mw
+        description: "Maximum Fire Radiative Power recorded."
+      - name: avg_days_without_rain
+        description: "Average consecutive days without rain."
+      - name: avg_precipitation_mm
+        description: "Average precipitation in mm."
+      - name: observation_period
+        description: "Date range of observations (e.g., 'April 2026 – May 2026')."
+      - name: risk_level
+        description: "Risk categorization: HIGH, MEDIUM, or LOW based on business rules."
+        tests:
+          - accepted_values:
+              values: ['HIGH', 'MEDIUM', 'LOW']

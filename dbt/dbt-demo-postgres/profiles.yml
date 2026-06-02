@@ -1,0 +1,13 @@
+dbt_demo: # Profile name (matches dbt_project.yml)
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DBT_POSTGRES_HOST', 'localhost') }}"
+      user: "{{ env_var('DBT_POSTGRES_USER', 'postgres') }}"
+      password: "{{ env_var('DBT_POSTGRES_PASSWORD', 'postgres') }}"
+      port: "{{ env_var('DBT_POSTGRES_PORT', '5432') | as_number }}"
+      dbname: "{{ env_var('DBT_POSTGRES_DATABASE', 'postgres') }}"
+      schema: "{{ env_var('DBT_POSTGRES_SCHEMA', 'public') }}"
+      threads: 1
+      keepalives_idle: 0

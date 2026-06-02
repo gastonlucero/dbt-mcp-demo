@@ -1,0 +1,85 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mcp-postgres-dev
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./fires_202604.csv:/docker-entrypoint-initdb.d/fires_202604.csv
+      - ./fires_202605.csv:/docker-entrypoint-initdb.d/fires_202605.csv
+      - ./history_fires_argentina.csv:/docker-entrypoint-initdb.d/history_fires_argentina.csv
+      - ./history_fires_brasil.csv:/docker-entrypoint-initdb.d/history_fires_brasil.csv
+      - ./history_fires_latam.csv:/docker-entrypoint-initdb.d/history_fires_latam.csv
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dbt-mcp-network
+
+  mcp-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: mcp-server-dev
+    ports:
+      - "9001:9001"
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      DB_HOST: postgres  # Override localhost from .env (container-to-container networking)
+    volumes:
+      - ../mcp-server/src:/app/src
+    command: uvicorn src.server:app --host 0.0.0.0 --port 9001 --reload --timeout-keep-alive 120
+    networks:
+      - dbt-mcp-network
+
+  dbt:
+    build:
+      context: ..
+      dockerfile: dbt/Dockerfile.dbt
+    container_name: dbt-dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mcp-server:
+        condition: service_started
+    env_file:
+      - ../.env
+    environment:
+      # Override localhost from .env to host.docker.internal (Docker Desktop)
+      # This allows containers to access services on the host machine
+      DB_HOST: host.docker.internal
+      DBT_POSTGRES_HOST: host.docker.internal
+      MCP_SERVER_URL: http://host.docker.internal:9001/mcp/
+      # dbt profiles directory
+      DBT_PROFILES_DIR: /app/dbt-demo-postgres
+    volumes:
+      - ../dbt/dbt-demo-postgres:/app/dbt-demo-postgres
+      - ../dbt/dbt-demo-postgres/target:/app/dbt-demo-postgres/target
+    # Override with interactive shell for development
+    # For production, use: dbt run && dbt test && dbt docs generate
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+    networks:
+      - dbt-mcp-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  dbt-mcp-network:
+    driver: bridge

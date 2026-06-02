@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "mcp-postgres": {
+      "url": "http://localhost:9001/mcp/",
+      "auth": {
+        "type": "bearer",
+        "token": "test-token"
+      },
+      "enabled": true,
+      "description": "PostgreSQL MCP Server - provides schema introspection and data preview tools"
+    }
+  },
+  "tools": {
+    "enabled": true,
+    "defaultTimeout": 30000
+  }
+}

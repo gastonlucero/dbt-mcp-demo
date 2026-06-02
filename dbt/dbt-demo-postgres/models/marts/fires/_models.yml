@@ -1,0 +1,139 @@
+version: 2
+
+models:
+  - name: fct_fires__risk_by_municipality
+    description: >
+      **Purpose:** Fire risk analysis by municipality with integrated frequency, intensity, and climatic metrics.
+
+      **Grain:** One row per (country, state, municipality) combination.
+
+      **Use Case:** Geographic risk assessment, municipality-level fire hazard analysis, drought correlation studies.
+
+      **Owner:** Analytics Team
+
+    meta:
+      grain: "One row per (country, state, municipality)"
+      use_case: "Municipal fire risk assessment and climate impact analysis"
+
+    columns:
+      - name: country
+        description: "Country name."
+        tests:
+          - not_null
+      - name: municipality
+        description: "Municipality name."
+        tests:
+          - not_null
+      - name: state
+        description: "State or province."
+        tests:
+          - not_null
+      - name: country_id
+        description: "Numeric country identifier."
+        tests:
+          - not_null
+      - name: state_id
+        description: "Numeric state identifier."
+        tests:
+          - not_null
+      - name: municipality_id
+        description: "Numeric municipality identifier."
+        tests:
+          - not_null
+      - name: total_fire_incidents
+        description: "Total distinct fire events detected in this municipality."
+        tests:
+          - not_null
+      - name: avg_incidents_per_day
+        description: "Average fire incidents per day over observation period."
+        tests:
+          - not_null
+      - name: avg_fire_risk_score
+        description: >
+          Average fire risk score (0–1 scale).
+          Nullable: source encodes missing values as -999, converted to NULL in staging.
+      - name: max_fire_risk_score
+        description: >
+          Maximum fire risk score recorded.
+          Nullable: same municipalities where all risk readings were -999 sentinel values.
+      - name: avg_fire_radiative_power_mw
+        description: >
+          Average Fire Radiative Power in megawatts.
+          Nullable: ~0.7% of source records have no FRP reading from the satellite.
+      - name: max_fire_radiative_power_mw
+        description: >
+          Maximum Fire Radiative Power recorded.
+          Nullable: same municipalities where all FRP readings are missing.
+      - name: avg_days_without_rain
+        description: "Average consecutive days without rain at fire detection."
+        tests:
+          - not_null
+      - name: avg_precipitation_mm
+        description: "Average precipitation in mm."
+        tests:
+          - not_null
+      - name: observation_period
+        description: "Date range of observations in readable format."
+        tests:
+          - not_null
+      - name: risk_level
+        description: "Risk categorization (HIGH/MEDIUM/LOW) based on incident frequency, intensity, and drought conditions."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['HIGH', 'MEDIUM', 'LOW']
+
+  - name: fct_fires__by_country_municipality
+    description: >
+      Total fire incidents and average precipitation per country and municipality.
+      Covers all fire detection events loaded from monthly CSV files (currently
+      April and May 2026). Useful for geographic comparison of fire activity
+      and drought conditions across Latin America.
+    meta:
+      grain: "One row per (country, municipality) combination."
+      use_case: >
+        Geographic analysis of fire hotspots. Compare municipalities by total
+        incidents, average precipitation deficit, and fire intensity.
+      materialization: table
+      materialization_reason: >
+        384K source rows collapse to ~5.5K output rows. Full rebuild takes < 1s.
+        Promote to incremental if source exceeds ~5M rows or loads become daily.
+    columns:
+      - name: country
+        description: "Country name."
+        tests:
+          - not_null
+      - name: municipality
+        description: "Municipality name."
+        tests:
+          - not_null
+      - name: state
+        description: "State or province."
+      - name: country_id
+        description: "Numeric country identifier."
+      - name: state_id
+        description: "Numeric state identifier."
+      - name: municipality_id
+        description: "Numeric municipality identifier."
+      - name: total_fire_incidents
+        description: "Total number of fire detection records for this municipality."
+        tests:
+          - not_null
+      - name: unique_fire_events
+        description: "Count of distinct fire event UUIDs."
+        tests:
+          - not_null
+      - name: avg_precipitation_mm
+        description: "Average precipitation in mm across all fire events."
+      - name: avg_days_without_rain
+        description: "Average consecutive days without rain at time of detection."
+      - name: avg_fire_risk_score
+        description: "Average fire risk score (0–1) for this municipality."
+      - name: max_fire_risk_score
+        description: "Maximum fire risk score recorded."
+      - name: avg_fire_radiative_power_mw
+        description: "Average Fire Radiative Power in megawatts."
+      - name: first_fire_detected_at
+        description: "Earliest fire detection timestamp."
+      - name: last_fire_detected_at
+        description: "Most recent fire detection timestamp."

@@ -1,0 +1,45 @@
+version: 2
+
+sources:
+  - name: fires_raw
+    schema: raw_data
+    description: "Raw fire incident data ingested from GOES-19 satellite CSV files."
+    tables:
+      - name: monthly_fires
+        description: >
+          One row per fire detection event. Covers April and May 2026 across
+          Latin America. Reported by satellite with geolocation, precipitation
+          and fire risk metrics.
+        columns:
+          - name: id
+            description: "UUID uniquely identifying the fire detection event."
+          - name: pais
+            description: "Country name (Spanish/Portuguese)."
+          - name: municipio
+            description: "Municipality name."
+          - name: estado
+            description: "State or province name."
+          - name: pais_id
+            description: "Numeric identifier for the country."
+          - name: estado_id
+            description: "Numeric identifier for the state."
+          - name: municipio_id
+            description: "Numeric identifier for the municipality."
+          - name: precipitacao
+            description: "Precipitation in mm at detection time."
+          - name: risco_fogo
+            description: "Fire risk score (0.0–1.0)."
+          - name: frp
+            description: "Fire Radiative Power in megawatts."
+          - name: numero_dias_sem_chuva
+            description: "Number of consecutive days without rain."
+          - name: data_hora_gmt
+            description: "UTC timestamp of the fire detection."
+          - name: satelite
+            description: "Satellite that detected the fire."
+          - name: bioma
+            description: "Biome classification (may be null)."
+          - name: lat
+            description: "Latitude of the detection."
+          - name: lon
+            description: "Longitude of the detection."

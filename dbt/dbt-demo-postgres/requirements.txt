@@ -1,0 +1,5 @@
+dbt-core==1.11.8
+dbt-postgres==1.10.0
+requests==2.34.1
+pydantic==2.13.4
+python-dotenv==1.2.2

@@ -1,0 +1,31 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    postgresql-client \
+    curl \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy dbt project requirements
+COPY dbt/dbt-demo-postgres/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy dbt project
+COPY dbt/dbt-demo-postgres/ /app/dbt-demo-postgres/
+
+# Copy entrypoint script
+COPY dbt/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+WORKDIR /app/dbt-demo-postgres
+
+# Set entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Default command (interactive shell)
+CMD [""]

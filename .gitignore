@@ -1,0 +1,27 @@
+# Secrets
+.env
+
+# dbt artifacts
+target/
+dbt_packages/
+logs/
+.user.yml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+dist/
+*.egg-info/
+.idea/
+.vscode/
+.DS_Store
+*.log
+*.sqlite3
+*.bak
+*.tmp
+*.swp
+*.swo
+*.zip
+*.tar.gz
