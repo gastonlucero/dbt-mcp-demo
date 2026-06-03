@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # Python deps of the MCP server (reads mcp-server/pyproject.toml)
+  - package-ecosystem: "pip"
+    directory: "/mcp-server"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+
+  # Actions used in the CI workflows (actions/checkout, setup-python, …)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "ci"
