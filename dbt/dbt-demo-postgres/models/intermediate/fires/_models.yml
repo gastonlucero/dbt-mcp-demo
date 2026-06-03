@@ -43,4 +43,5 @@ models:
         description: "Risk categorization: HIGH, MEDIUM, or LOW based on business rules."
         tests:
           - accepted_values:
-              values: ['HIGH', 'MEDIUM', 'LOW']
+              arguments:
+                values: ['HIGH', 'MEDIUM', 'LOW']

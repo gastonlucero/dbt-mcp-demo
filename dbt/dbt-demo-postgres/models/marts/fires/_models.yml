@@ -81,7 +81,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['HIGH', 'MEDIUM', 'LOW']
+              arguments:
+                values: ['HIGH', 'MEDIUM', 'LOW']
 
   - name: fct_fires__by_country_municipality
     description: >
