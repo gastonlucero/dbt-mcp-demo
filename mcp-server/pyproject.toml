@@ -20,6 +20,6 @@ testpaths = ["tests"]
 pythonpath = ["."]   # makes `from src...` importable when running plain `pytest`
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=82.0.1"]
 build-backend = "setuptools.build_meta"
 
