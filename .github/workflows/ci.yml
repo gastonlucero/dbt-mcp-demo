@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  mcp-tests:
+    name: MCP server tests (unit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        working-directory: mcp-server
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest
+      - name: Run unit tests (server tests auto-skip without a live server)
+        working-directory: mcp-server
+        run: pytest -v
+
+  stack-e2e:
+    name: Full stack + dbt build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create .env from template
+        run: cp .env.example .env
+
+      - name: Start the stack
+        run: docker compose -f docker/docker-compose.yml up -d --build
+
+      - name: Wait for Postgres to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if docker exec mcp-postgres-dev pg_isready -U postgres; then exit 0; fi
+            sleep 2
+          done
+          echo "Postgres did not become ready in time" && exit 1
+
+      - name: dbt build (run + test all models)
+        run: |
+          docker exec dbt-dev dbt deps
+          docker exec dbt-dev dbt build
+
+      - name: MCP server + tools smoke tests
+        working-directory: mcp-server
+        env:
+          AUTH_TOKEN: your-secret-token-here   # matches .env.example
+        run: |
+          python3 -m pip install --upgrade pip pytest
+          python3 -m pytest tests/test_server.py -v
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker/docker-compose.yml down -v
