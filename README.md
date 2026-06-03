@@ -1,5 +1,8 @@
 # dbt-demo-mcp
 
+[![CI](https://github.com/gastonlucero/dbt-mcp-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/gastonlucero/dbt-mcp-demo/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 An analytics stack where an **AI agent builds dbt models for you** — safely, by exploring the
 database through a read-only **MCP server** instead of guessing.
 
