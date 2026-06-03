@@ -17,6 +17,7 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]   # makes `from src...` importable when running plain `pytest`
 
 [build-system]
 requires = ["setuptools>=61.0"]
