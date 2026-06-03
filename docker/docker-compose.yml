@@ -58,11 +58,12 @@ services:
     env_file:
       - ../.env
     environment:
-      # Override localhost from .env to host.docker.internal (Docker Desktop)
-      # This allows containers to access services on the host machine
-      DB_HOST: host.docker.internal
-      DBT_POSTGRES_HOST: host.docker.internal
-      MCP_SERVER_URL: http://host.docker.internal:9001/mcp/
+      # Reach the other services by their compose service name (same bridge network).
+      # Portable: works on Linux CI and Docker Desktop alike — unlike host.docker.internal,
+      # which does not resolve on Linux Docker.
+      DB_HOST: postgres
+      DBT_POSTGRES_HOST: postgres
+      MCP_SERVER_URL: http://mcp-server:9001/mcp/
       # dbt profiles directory
       DBT_PROFILES_DIR: /app/dbt-demo-postgres
     volumes:

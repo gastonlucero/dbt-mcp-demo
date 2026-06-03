@@ -32,8 +32,10 @@ docker exec dbt-dev dbt <cmd>                              # dbt
 docker exec mcp-postgres-dev psql -U postgres -c "..."     # SQL
 ```
 
-The `dbt` container reaches Postgres via `host.docker.internal` (overridden in the compose
-`environment:` block), not the service name — so `.env` values are defaults, not the final word.
+The compose `environment:` blocks override host-related vars at runtime (the `dbt` service
+points `DBT_POSTGRES_HOST` at the `postgres` service by name), so `.env` values are defaults,
+not the final word. Service names are used over `host.docker.internal` so the stack works on
+Linux CI too.
 
 ---
 
