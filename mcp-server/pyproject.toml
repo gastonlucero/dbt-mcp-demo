@@ -6,7 +6,7 @@ dependencies = [
     "mcp>=1.27.1",
     "sqlglot>=30.7.0",
     "pydantic-settings>=2.14.1",
-    "uvicorn[standard]>=0.46.0",  # [standard] adds uvloop + httptools
+    "uvicorn[standard]>=0.48.0",  # [standard] adds uvloop + httptools
     "psycopg2-binary>=2.9.12",
 ]
 
