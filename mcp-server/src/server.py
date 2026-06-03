@@ -6,7 +6,7 @@ from decimal import Decimal
 
 import uvicorn
 from mcp.server.fastmcp import FastMCP
-from mcp.types import CallToolResult, TextContent
+from mcp.types import CallToolResult, TextContent, ToolAnnotations
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -18,6 +18,15 @@ from src.logic.gatekeeper import McpSecurityError, validate_schema, validate_sql
 # Allowlist pattern for SQL identifiers: letters, digits, underscores, dollar sign.
 # Prevents SQL injection in statements that do not support parameterized queries.
 _IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_$]*$")
+
+# All four tools are read-only DB introspection/query helpers. Declaring the hints
+# makes clients (e.g. the MCP Inspector) display them as read-only / non-destructive.
+_READONLY = ToolAnnotations(
+    readOnlyHint=True,
+    destructiveHint=False,
+    idempotentHint=True,
+    openWorldHint=False,
+)
 
 
 def _validate_identifier(value: str, label: str) -> str:
@@ -85,7 +94,7 @@ mcp = FastMCP("dbt-mcp-tools", stateless_http=True, json_response=True)
 # ---------------------------------------------------------------------------
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READONLY)
 def list_tables(schema_name: str) -> CallToolResult:
     """Fetch all table names and types for a given schema via information_schema."""
     try:
@@ -110,7 +119,7 @@ def list_tables(schema_name: str) -> CallToolResult:
         return _error_response(f"Error: {str(e)}\nType: {type(e).__name__}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READONLY)
 def get_table_ddl(schema: str, table: str) -> CallToolResult:
     """Retrieve the physical schema of a table via information_schema.columns."""
     try:
@@ -137,7 +146,7 @@ def get_table_ddl(schema: str, table: str) -> CallToolResult:
         return _error_response(f"Error: {str(e)}\nType: {type(e).__name__}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READONLY)
 def explain_query(query: str) -> CallToolResult:
     """Execute an EXPLAIN plan on a compiled dbt SQL query.
 
@@ -162,7 +171,7 @@ def explain_query(query: str) -> CallToolResult:
         return _error_response(f"Error: {str(e)}\nType: {type(e).__name__}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READONLY)
 def preview_data(query: str) -> CallToolResult:
     """Fetch a safe data sample (max 50 rows).
 
